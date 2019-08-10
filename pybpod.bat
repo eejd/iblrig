@@ -1,6 +1,6 @@
 @echo off
-set iblrig_dir=C:\iblrig
-set projects_dir=C:\iblrig_params
+set iblrig_dir=C:\Users\User\Documents\EEJDGitHub\iblrig
+set projects_dir=C:\Users\User\Documents\EEJDGitHub\iblrig_params
 
 echo Activating IBL environment...
 call activate iblenv %*
