@@ -2,7 +2,7 @@
 # TASK PARAMETER DEFINITION (should appear on GUI) init trial objects values
 # =============================================================================
 # IBL rig root folder
-IBLRIG_FOLDER = 'C:\\iblrig'
+IBLRIG_FOLDER = 'C:\\Users\\User\\Documents\\EEJDGitHub\\iblrig'
 IBLRIG_DATA_FOLDER = None  # If None data folder will be ..\\iblrig_data from IBLRIG_FOLDER  # noqa
 # SOUND, AMBIENT SENSOR, AND VIDEO RECORDINGS
 RECORD_SOUND = True
@@ -53,7 +53,7 @@ GO_TONE_FREQUENCY = 5000  # 5KHz
 GO_TONE_AMPLITUDE = 0.0272  # [0->1] 0.0272 for 70dB SPL Xonar
 # ADAPTIVE PARAMETERS
 # ADAPTIVE REWARD PARAMETERS (IGNORED IF ADAPTIVE_REWARD = False)
-ADAPTIVE_REWARD = True  # wether to increase reware at session start usin AR_* criteria  # noqa
+ADAPTIVE_REWARD = False  # wether to increase reware at session start usin AR_* criteria  # noqa
 AR_INIT_VALUE = 3  # µl
 AR_MAX_VALUE = 3
 AR_MIN_VALUE = 1.5  # (µl) 1.5 µl for sugar water, 2 µl for normal water
