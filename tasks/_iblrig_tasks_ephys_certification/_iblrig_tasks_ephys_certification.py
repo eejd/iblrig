@@ -20,12 +20,12 @@ BONSAI_FOLDER = Path(sph.IBLRIG_FOLDER) / 'Bonsai'
 bns = str(BONSAI_FOLDER / 'Bonsai64.exe')
 # wrkfl = Path(sph.IBLRIG_FOLDER) / 'visual_stim' / \
 #     sph.VISUAL_STIMULUS_TYPE / 'certification.bonsai'
-misc_folder = Path(sph.IBLRIG_FOLDER) / 'visual_stim' / 'misc'
-stim_00_folder = misc_folder / '00_SpacerStim'
-stim_01_folder = misc_folder / '01_ReceptiveFieldMappingStim'
-stim_02_folder = misc_folder / '02_OrientationDirectionSelectivityStim'
-stim_03_folder = misc_folder / '03_ContrastReversingCheckerboardStim'
-stim_04_folder = misc_folder / '04_ContrastSelectivityTaskStim'
+certification_folder = Path(sph.IBLRIG_FOLDER) / 'visual_stim' / 'ephys_certification'
+stim_00_folder = certification_folder / '00_SpacerStim'
+stim_01_folder = certification_folder / '01_ReceptiveFieldMappingStim'
+stim_02_folder = certification_folder / '02_OrientationDirectionSelectivityStim'
+stim_03_folder = certification_folder / '03_ContrastReversingCheckerboardStim'
+stim_04_folder = certification_folder / '04_ContrastSelectivityTaskStim'
 wrkfl_00 = str(stim_00_folder / 'spacer.bonsai')
 wrkfl_01 = str(stim_01_folder / 'ReceptiveFieldMappingStim.bonsai')
 wrkfl_02 = str(stim_02_folder / 'OrientationDirectionSelectivityStim.bonsai')
@@ -51,58 +51,71 @@ cmd_04 = [bns, wrkfl_04, noedit, noboot, cmd_04_stims_test]
 # 0. Spacer
 os.chdir(stim_00_folder)
 s = subprocess.run(cmd_00, stdout=subprocess.PIPE)  # call locks!
+time.sleep(3)
 # 5. Spontaneous
 log.info('Starting 900 seconds of nothingness... [yes, it''s 15 minutes] :)')
 time.sleep(900)
 # 0. Spacer
 os.chdir(stim_00_folder)
 s = subprocess.run(cmd_00, stdout=subprocess.PIPE)  # call locks!
+time.sleep(3)
 # 2. Gratings
 log.info('Starting Orientation Direction Selectivity Simulus:')
 log.info(' '.join(cmd_02))
 os.chdir(stim_02_folder)
 s = subprocess.run(cmd_02, stdout=subprocess.PIPE)  # call locks!
+time.sleep(3)
 # 0. Spacer
 os.chdir(stim_00_folder)
 s = subprocess.run(cmd_00, stdout=subprocess.PIPE)  # call locks!
+time.sleep(3)
 # 1. Receptive Field mapping
 log.info('Starting Receptive Field Mapping Simulus:')
 log.info(' '.join(cmd_01))
 os.chdir(stim_01_folder)
 s = subprocess.run(cmd_01, stdout=subprocess.PIPE)  # call locks!
+time.sleep(3)
 # 0. Spacer
 os.chdir(stim_00_folder)
 s = subprocess.run(cmd_00, stdout=subprocess.PIPE)  # call locks!
+time.sleep(3)
 # 3. Contrast reversal stimuli
 log.info('Starting ContrastReversingCheckerboardStim:')
 log.info(' '.join(cmd_03))
 os.chdir(stim_03_folder)
 s = subprocess.run(cmd_03, stdout=subprocess.PIPE)  # call locks!
+time.sleep(3)
 # 0. Spacer
 os.chdir(stim_00_folder)
 s = subprocess.run(cmd_00, stdout=subprocess.PIPE)  # call locks!
+time.sleep(3)
 # 4. Different contrast task stimuli
 log.info('Starting ContrastSelectivityTaskStim:')
 log.info(' '.join(cmd_04))
 os.chdir(stim_04_folder)
 s = subprocess.run(cmd_04, stdout=subprocess.PIPE)  # call locks!
+time.sleep(3)
 # 0. Spacer
 os.chdir(stim_00_folder)
 s = subprocess.run(cmd_00, stdout=subprocess.PIPE)  # call locks!
+time.sleep(3)
 # 5. Spontaneous 2
 log.info('Starting 900 seconds of nothingness... [yes, it''s 15 minutes] :)')
 time.sleep(900)
 # 0. Spacer
 os.chdir(stim_00_folder)
 s = subprocess.run(cmd_00, stdout=subprocess.PIPE)  # call locks!
+time.sleep(3)
 # 2. Gratings 2
 log.info('Starting Orientation Direction Selectivity Simulus:')
 log.info(' '.join(cmd_02))
 os.chdir(stim_02_folder)
 s = subprocess.run(cmd_02, stdout=subprocess.PIPE)  # call locks!
+time.sleep(3)
 # 0. Spacer
 os.chdir(stim_00_folder)
 s = subprocess.run(cmd_00, stdout=subprocess.PIPE)  # call locks!
+time.sleep(3)
 # The end
 os.chdir(CWD)
 log.info("You're done, please remove the mouse.\n" * 42)
