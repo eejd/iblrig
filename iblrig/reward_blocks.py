@@ -23,52 +23,37 @@ def update_block_params(tph):
     return tph
 
 
-def update_probability_left(tph):
+def update_reward_size(tph):
     if tph.reward_block_trial_num != 1:
-        return tph.stim_probability_left
+        return tph.reward_amount
 
-    if tph.reward_block_num == 1 and tph.reward_block_init_5050:
-        return 0.5
-    elif tph.reward_block_num == 1 and not tph.reward_block_init_5050:
-        return np.random.choice(tph.reward_block_probability_set)
-    elif tph.reward_block_num == 2 and tph.reward_block_init_5050:
-        return np.random.choice(tph.reward_block_probability_set)
+    if tph.reward_block_num == 1 and tph.reward_block_init_1:
+        return tph.reward_amount
     else:
-        return round(abs(1 - tph.stim_probability_left), 1)
-
-
-def draw_position(position_set, stim_probability_left):
-    return int(np.random.choice(
-        position_set, p=[stim_probability_left, 1 - stim_probability_left]))
+        return tph.reward_block_multiplier_set[tph.contrast_set.index(tph.contrast)]
 
 
 def init_block_len(tph):
     if tph.reward_block_init_5050:
         return 90
     else:
-        return get_block_len(
+        return self.get_block_len(
             factor=tph.reward_block_len_factor, min_=tph.reward_block_len_min,
             max_=tph.reward_block_len_max)
 
 
-def init_probability_left(tph):
-    if tph.reward_block_init_5050:
-        return 0.5
+def init_reward_amount(sph, tph):
+    if tph.reward_block_init_1:
+        return sph.REWARD_AMOUNT
     else:
-        return np.random.choice(tph.reward_block_probability_set)
+        return tph.reward_block_multiplier_set[tph.contrast_set.index(tph.contrast)]
 
 
-def calc_probability_left(tph):
-    if tph.reward_block_num == 1:
-        out = 0.5
-    elif tph.reward_block_num == 2:
-        spos = np.sign(tph.position_buffer)
-        low = tph.len_blocks_buffer[0]
-        high = tph.len_blocks_buffer[0] + tph.len_blocks_buffer[1]
-        if np.sum(spos[low:high]) / tph.len_blocks_buffer[1] > 0:
-            out = 0.2
-        else:
-            out = 0.8
+# this could be moved to a different function, depends on blocks?
+def get_reward_amount_with_rpe(tph):
+    alt_reward_values = set(tph.reward_block_multiplier_set).difference(set(tph.reward_amount))
+    if np.random.rand() < tph.reward_rpe_probability:
+        return np.random.choice(alt_reward_values)
     else:
-        out = np.round(np.abs(1 - tph.stim_probability_left), 1)
-    return out
+        return tph.reward_amount
+

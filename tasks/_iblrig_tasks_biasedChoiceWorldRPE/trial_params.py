@@ -13,7 +13,9 @@ import numpy as np
 from dateutil import parser
 
 import iblrig.ambient_sensor as ambient_sensor
-import iblrig.blocks as blocks
+import iblrig.stim_blocks as stim_blocks
+import iblrig.reward_blocks as reward_blocks
+import iblrig.adaptive as adaptive
 import iblrig.bonsai as bonsai
 import iblrig.misc as misc
 from iblrig.check_sync_pulses import sync_check
@@ -58,26 +60,24 @@ class TrialParamHandler(object):
         self.save_ambient_data = sph.RECORD_AMBIENT_SENSOR_DATA
         self.as_data = {'Temperature_C': 0, 'AirPressure_mb': 0,
                         'RelativeHumidity': 0}
-        # Reward amount
-        self.reward_amount = sph.REWARD_AMOUNT
-        self.reward_valve_time = sph.REWARD_VALVE_TIME
+
         self.iti_correct = self.iti_correct_target - self.reward_valve_time
         # Initialize parameters that may change every trial
         self.trial_num = 0
         self.stim_phase = 0.
 
-        self.block_num = 0
-        self.block_trial_num = 0
-        self.block_len_factor = sph.BLOCK_LEN_FACTOR
-        self.block_len_min = sph.BLOCK_LEN_MIN
-        self.block_len_max = sph.BLOCK_LEN_MAX
-        self.block_probability_set = sph.BLOCK_PROBABILITY_SET
-        self.block_init_5050 = sph.BLOCK_INIT_5050
-        self.block_len = blocks.init_block_len(self)
+        self.stim_stim_block_num = 0
+        self.stim_stim_block_trial_num = 0
+        self.stim_block_len_factor = sph.BLOCK_LEN_FACTOR
+        self.stim_block_len_min = sph.BLOCK_LEN_MIN
+        self.stim_block_len_max = sph.BLOCK_LEN_MAX
+        self.stim_block_probability_set = sph.BLOCK_PROBABILITY_SET
+        self.stim_block_init_5050 = sph.BLOCK_INIT_5050
+        self.stim_block_len = stim_blocks.init_block_len(self)
         # Position
-        self.stim_probability_left = blocks.init_probability_left(self)
+        self.stim_probability_left = stim_blocks.init_probability_left(self)
         self.stim_probability_left_buffer = [self.stim_probability_left]
-        self.position = blocks.draw_position(
+        self.position = stim_blocks.draw_position(
             self.position_set, self.stim_probability_left)
         self.position_buffer = [self.position]
         # Contrast
@@ -85,6 +85,18 @@ class TrialParamHandler(object):
         self.contrast_buffer = [self.contrast]
         self.signed_contrast = self.contrast * np.sign(self.position)
         self.signed_contrast_buffer = [self.signed_contrast]
+        # Reward amount
+        self.reward_block_num = 0
+        self.reward_block_trial_num = 0
+        self.reward_block_len_factor = sph.REWARD_BLOCK_LEN_FACTOR
+        self.reward_block_len_min = sph.REWARD_BLOCK_LEN_MIN
+        self.reward_block_len_max = sph.REWARD_BLOCK_LEN_MAX
+        self.reward_rpe_probability = sph.REWARD_RPE_PROBABILITY
+        self.reward_block_init_1 = sph.REWARD_BLOCK_INIT_1
+        self.reward_block_multiplier_set = sph.REWARD_BLOCK_MULTIPLIER_SET
+        self.reward_block_len = reward_blocks.init_block_len(self)
+        self.reward_amount = reward_block.init_reward_amount(sph, self)
+        self.reward_valve_time = adaptive.get_time_from_amount(sph, self.reward_amount)
         # RE event names
         self.event_error = self.threshold_events_dict[self.position]
         self.event_reward = self.threshold_events_dict[-self.position]
@@ -130,8 +142,8 @@ STIM POSITION:        {self.position}
 STIM CONTRAST:        {self.contrast}
 STIM PHASE:           {self.stim_phase}
 
-BLOCK NUMBER:         {self.block_num}
-BLOCK LENGTH:         {self.block_len}
+BLOCK NUMBER:         {self.stim_block_num}
+BLOCK LENGTH:         {self.stim_block_len}
 TRIALS IN BLOCK:      {self.block_trial_num}
 STIM PROB LEFT:       {self.stim_probability_left}
 
@@ -152,8 +164,10 @@ RELATIVE HUMIDITY:    {self.as_data['RelativeHumidity']} %
         # First trial exception
         if self.trial_num == 0:
             self.trial_num += 1
-            self.block_num += 1
-            self.block_trial_num += 1
+            self.stim_block_num += 1
+            self.stim_block_trial_num += 1
+            self.reward_block_num += 1
+            self.reward_block_trial_num += 1
             # Send next trial info to Bonsai
             bonsai.send_current_trial_info(self)
             return
@@ -165,12 +179,12 @@ RELATIVE HUMIDITY:    {self.as_data['RelativeHumidity']} %
         # Update stimulus phase
         self.stim_phase = random.uniform(0, math.pi)
         # Update block
-        self = blocks.update_block_params(self)
+        self = stim_blocks.update_block_params(self)
         # Update stim probability left + buffer
-        self.stim_probability_left = blocks.update_probability_left(self)
+        self.stim_probability_left = stim_blocks.update_probability_left(self)
         self.stim_probability_left_buffer.append(self.stim_probability_left)
         # Update position + buffer
-        self.position = blocks.draw_position(
+        self.position = stim_blocks.draw_position(
             self.position_set, self.stim_probability_left)
         self.position_buffer.append(self.position)
         # Update contrast + buffer
@@ -180,6 +194,11 @@ RELATIVE HUMIDITY:    {self.as_data['RelativeHumidity']} %
         # Update signed_contrast + buffer (AFTER position update)
         self.signed_contrast = self.contrast * np.sign(self.position)
         self.signed_contrast_buffer.append(self.signed_contrast)
+        # update reward
+        self.reward_amount = reward_blocks.update_reward_size(self)
+        # this could be combined with above or seperated completely
+        self.reward_amount = reward_blocks.get_reward_amount_with_rpe(self)
+        self.reward_valve_time = adaptive.get_time_from_amount(sph, self.reward_amount)
         # Update state machine events
         self.event_error = self.threshold_events_dict[self.position]
         self.event_reward = self.threshold_events_dict[-self.position]
@@ -304,8 +323,8 @@ if __name__ == '__main__':
         tph.show_trial_log()
 
         trial_completed_times.append(time.time() - t)
-        print('\nBLOCK NUM: {:>16}'.format(tph.block_num))
-        print('BLOCK TRIAL NUM: {:>10s}'.format(
+        print('\nBLOCK NUM: {:>16}'.format(tph.stim_block_num))
+        print('BLOCK TRIAL NUM: {:>10s}'.formatstim_(
             f'{tph.block_trial_num}/{tph.block_len}'))
         print('PROBABILITY_LEFT: {:>9}'.format(tph.stim_probability_left))
         print('SIGNED CONTRAST: {:>10}'.format(tph.signed_contrast))
