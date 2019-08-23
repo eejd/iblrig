@@ -94,8 +94,9 @@ class TrialParamHandler(object):
         self.reward_rpe_probability = sph.REWARD_RPE_PROBABILITY
         self.reward_block_init_1 = sph.REWARD_BLOCK_INIT_1
         self.reward_block_multiplier_set = sph.REWARD_BLOCK_MULTIPLIER_SET
+        self.reward_block_multiplier = reward_block.init_reward_multiplier(sph, self)
         self.reward_block_len = reward_blocks.init_block_len(self)
-        self.reward_amount = reward_block.init_reward_amount(sph, self)
+        self.reward_amount = sph.REWARD_AMOUNT * self.reward_block_multiplier
         self.reward_valve_time = adaptive.get_time_from_amount(sph, self.reward_amount)
         # RE event names
         self.event_error = self.threshold_events_dict[self.position]
@@ -195,7 +196,7 @@ RELATIVE HUMIDITY:    {self.as_data['RelativeHumidity']} %
         self.signed_contrast = self.contrast * np.sign(self.position)
         self.signed_contrast_buffer.append(self.signed_contrast)
         # update reward
-        self.reward_amount = reward_blocks.update_reward_size(self)
+        self.reward_block_multiplier = reward_blocks.update_reward_multiplier(self)
         # this could be combined with above or seperated completely
         self.reward_amount = reward_blocks.get_reward_amount_with_rpe(self)
         self.reward_valve_time = adaptive.get_time_from_amount(sph, self.reward_amount)

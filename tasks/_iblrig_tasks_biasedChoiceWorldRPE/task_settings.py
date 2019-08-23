@@ -16,6 +16,7 @@ REWARD_AMOUNT = 1.5  # (µl) Amount of reward to be delivered upon correct choic
 REWARD_TYPE = 'Water 10% Sucrose'  # Water, Water 10% Sucrose, Water 15% Sucrose, Water 2% Citric Acid (Guo et al.. PLoS One 2014)  # noqa
 REWARD_BLOCK_INIT_1 = True
 REWARD_BLOCK_MULTIPLIER_SET = [1, 1, 2, 2, 2] # for alternative reward block, multiplier per contrast level
+REWARD_BLOCK_INIT_MULTIPLIER = 1
 REWARD_BLOCK_LEN_FACTOR = 30 # mean block length
 REWARD_BLOCK_LEN_MIN = 20 # min block length
 REWARD_BLOCK_LEN_MAX = 60 # max block length

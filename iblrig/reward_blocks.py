@@ -23,12 +23,12 @@ def update_block_params(tph):
     return tph
 
 
-def update_reward_size(tph):
+def update_reward_multiplier(tph):
     if tph.reward_block_trial_num != 1:
-        return tph.reward_amount
+        return tph.reward_block_multiplier
 
     if tph.reward_block_num == 1 and tph.reward_block_init_1:
-        return tph.reward_amount
+        return tph.reward_block_multiplier
     else:
         return tph.reward_block_multiplier_set[tph.contrast_set.index(tph.contrast)]
 
@@ -44,16 +44,16 @@ def init_block_len(tph):
 
 def init_reward_amount(sph, tph):
     if tph.reward_block_init_1:
-        return sph.REWARD_AMOUNT
+        return sph.REWARD_BLOCK_INIT_MULTIPLIER
     else:
         return tph.reward_block_multiplier_set[tph.contrast_set.index(tph.contrast)]
 
 
 # this could be moved to a different function, depends on blocks?
 def get_reward_amount_with_rpe(tph):
-    alt_reward_values = set(tph.reward_block_multiplier_set).difference(set(tph.reward_amount))
+    alt_reward_multiplier_values = set(tph.reward_block_multiplier_set).difference(set(tph.reward_amount))
     if np.random.rand() < tph.reward_rpe_probability:
-        return np.random.choice(alt_reward_values)
+        return tph.reward_amount * np.random.choice(alt_reward_multiplier_values)
     else:
-        return tph.reward_amount
+        return tph.reward_amount * tph.reward_block_multiplier
 
