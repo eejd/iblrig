@@ -17,8 +17,9 @@ REWARD_TYPE = 'Water 10% Sucrose'  # Water, Water 10% Sucrose, Water 15% Sucrose
 REWARD_BLOCK_INIT_1 = True
 REWARD_BLOCK_MULTIPLIER_SET = [1, 1, 2, 2, 2] # for alternative reward block, multiplier per contrast level
 REWARD_BLOCK_INIT_MULTIPLIER = 1
+REWARD_BLOCK_NORMAL = True
 REWARD_BLOCK_LEN_FACTOR = 30 # mean block length
-REWARD_BLOCK_LEN_MIN = 20 # min block length
+REWARD_BLOCK_LEN_MIN = 15 # min block length
 REWARD_BLOCK_LEN_MAX = 60 # max block length
 REWARD_RPE_PROBABILITY = 0.05 # probability of changing the expected reward (regardless)# TASK
 

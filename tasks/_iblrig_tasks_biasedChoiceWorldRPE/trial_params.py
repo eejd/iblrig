@@ -13,7 +13,7 @@ import numpy as np
 from dateutil import parser
 
 import iblrig.ambient_sensor as ambient_sensor
-import iblrig.stim_blocks as stim_blocks
+import iblrig.blocks as stim_blocks
 import iblrig.reward_blocks as reward_blocks
 import iblrig.adaptive as adaptive
 import iblrig.bonsai as bonsai
@@ -61,19 +61,18 @@ class TrialParamHandler(object):
         self.as_data = {'Temperature_C': 0, 'AirPressure_mb': 0,
                         'RelativeHumidity': 0}
 
-        self.iti_correct = self.iti_correct_target - self.reward_valve_time
         # Initialize parameters that may change every trial
         self.trial_num = 0
         self.stim_phase = 0.
 
-        self.stim_stim_block_num = 0
-        self.stim_stim_block_trial_num = 0
-        self.stim_block_len_factor = sph.BLOCK_LEN_FACTOR
-        self.stim_block_len_min = sph.BLOCK_LEN_MIN
-        self.stim_block_len_max = sph.BLOCK_LEN_MAX
-        self.stim_block_probability_set = sph.BLOCK_PROBABILITY_SET
-        self.stim_block_init_5050 = sph.BLOCK_INIT_5050
-        self.stim_block_len = stim_blocks.init_block_len(self)
+        self.block_num = 0
+        self.block_trial_num = 0
+        self.block_len_factor = sph.BLOCK_LEN_FACTOR
+        self.block_len_min = sph.BLOCK_LEN_MIN
+        self.block_len_max = sph.BLOCK_LEN_MAX
+        self.block_probability_set = sph.BLOCK_PROBABILITY_SET
+        self.block_init_5050 = sph.BLOCK_INIT_5050
+        self.block_len = stim_blocks.init_block_len(self)
         # Position
         self.stim_probability_left = stim_blocks.init_probability_left(self)
         self.stim_probability_left_buffer = [self.stim_probability_left]
@@ -94,10 +93,14 @@ class TrialParamHandler(object):
         self.reward_rpe_probability = sph.REWARD_RPE_PROBABILITY
         self.reward_block_init_1 = sph.REWARD_BLOCK_INIT_1
         self.reward_block_multiplier_set = sph.REWARD_BLOCK_MULTIPLIER_SET
-        self.reward_block_multiplier = reward_block.init_reward_multiplier(sph, self)
+        self.reward_block_normal = sph.REWARD_BLOCK_NORMAL
+        self.reward_block_rpe = False
+        self.reward_block_multiplier = reward_blocks.init_reward_multiplier(sph, self)
         self.reward_block_len = reward_blocks.init_block_len(self)
-        self.reward_amount = sph.REWARD_AMOUNT * self.reward_block_multiplier
-        self.reward_valve_time = adaptive.get_time_from_amount(sph, self.reward_amount)
+        self.reward_amount = sph.REWARD_AMOUNT
+        self.reward_block_amount = self.reward_amount * self.reward_block_multiplier
+        self.reward_valve_time = adaptive.get_time_from_amount(sph, self.reward_block_amount)
+        self.iti_correct = self.iti_correct_target - self.reward_valve_time
         # RE event names
         self.event_error = self.threshold_events_dict[self.position]
         self.event_reward = self.threshold_events_dict[-self.position]
@@ -115,6 +118,8 @@ class TrialParamHandler(object):
         self.trial_correct_buffer = []
         self.ntrials_correct = 0
         self.water_delivered = 0
+        # TODO: hack to handle adaptive not being an object
+        self.sph = sph
 
     def check_stop_criterions(self):
         return misc.check_stop_criterions(
@@ -143,10 +148,18 @@ STIM POSITION:        {self.position}
 STIM CONTRAST:        {self.contrast}
 STIM PHASE:           {self.stim_phase}
 
-BLOCK NUMBER:         {self.stim_block_num}
-BLOCK LENGTH:         {self.stim_block_len}
+BLOCK NUMBER:         {self.block_num}
+BLOCK LENGTH:         {self.block_len}
 TRIALS IN BLOCK:      {self.block_trial_num}
 STIM PROB LEFT:       {self.stim_probability_left}
+
+REWARD BLOCK NUMBER:        {self.reward_block_num}
+REWARD BLOCK LENGTH:        {self.reward_block_len}
+TRIALS IN REWARD BLOCK:     {self.reward_block_trial_num}
+REWARD BLOCK NORMAL         {self.reward_block_normal}
+REWARD MULTIPLIER:          {self.reward_block_multiplier}
+RPE                         {self.reward_block_rpe}
+REWARD AMOUNT:              {self.reward_block_amount}
 
 RESPONSE TIME:        {self.response_time_buffer[-1]}
 TRIAL CORRECT:        {self.trial_correct}
@@ -165,8 +178,8 @@ RELATIVE HUMIDITY:    {self.as_data['RelativeHumidity']} %
         # First trial exception
         if self.trial_num == 0:
             self.trial_num += 1
-            self.stim_block_num += 1
-            self.stim_block_trial_num += 1
+            self.block_num += 1
+            self.block_trial_num += 1
             self.reward_block_num += 1
             self.reward_block_trial_num += 1
             # Send next trial info to Bonsai
@@ -181,6 +194,7 @@ RELATIVE HUMIDITY:    {self.as_data['RelativeHumidity']} %
         self.stim_phase = random.uniform(0, math.pi)
         # Update block
         self = stim_blocks.update_block_params(self)
+        self = reward_blocks.update_block_params(self)
         # Update stim probability left + buffer
         self.stim_probability_left = stim_blocks.update_probability_left(self)
         self.stim_probability_left_buffer.append(self.stim_probability_left)
@@ -196,10 +210,16 @@ RELATIVE HUMIDITY:    {self.as_data['RelativeHumidity']} %
         self.signed_contrast = self.contrast * np.sign(self.position)
         self.signed_contrast_buffer.append(self.signed_contrast)
         # update reward
-        self.reward_block_multiplier = reward_blocks.update_reward_multiplier(self)
+        self.reward_block_multiplier = reward_blocks.get_reward_multiplier(self)
         # this could be combined with above or seperated completely
-        self.reward_amount = reward_blocks.get_reward_amount_with_rpe(self)
-        self.reward_valve_time = adaptive.get_time_from_amount(sph, self.reward_amount)
+        tmp_rpe_multiplier = reward_blocks.get_reward_multiplier_with_rpe(self)
+        if self.reward_block_multiplier != tmp_rpe_multiplier:
+            self.reward_block_rpe = True
+        else:
+            self.reward_block_rpe = False
+        self.reward_block_multiplier = tmp_rpe_multiplier
+        self.reward_block_amount = self.reward_amount * self.reward_block_multiplier
+        self.reward_valve_time = adaptive.get_time_from_amount(self.sph, self.reward_block_amount)
         # Update state machine events
         self.event_error = self.threshold_events_dict[self.position]
         self.event_reward = self.threshold_events_dict[-self.position]
@@ -259,6 +279,7 @@ RELATIVE HUMIDITY:    {self.as_data['RelativeHumidity']} %
         params['response_time_buffer'] = ''
         params['response_side_buffer'] = ''
         params['trial_correct_buffer'] = ''
+        params['sph'] = None
         # Dump and save
         out = json.dumps(params, cls=ComplexEncoder)
         self.data_file.write(out)

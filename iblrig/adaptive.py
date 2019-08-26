@@ -85,13 +85,16 @@ def init_calib_func_range(sph) -> tuple:
 
 # TODO: initialize calibration, etc when module first loaded via sph and the dependency here removed
 def get_time_from_amount(sph, reward_amount) -> float:
-    out = sph.CALIB_FUNC_RANGE[0]
-    while np.round(sph.CALIB_FUNC(out), 3) < reward_amount:
-        out += 1
-        if out >= sph.CALIB_FUNC_RANGE[1]:
-            break
-    out /= 1000
-
+    if not sph.AUTOMATIC_CALIBRATION:
+        out = sph.CALIBRATION_VALUE / 3 * reward_amount # TODO: why the factor of three?
+    else:
+        out = sph.CALIB_FUNC_RANGE[0]
+        while np.round(sph.CALIB_FUNC(out), 3) < reward_amount:
+            out += 1
+            if out >= sph.CALIB_FUNC_RANGE[1]:
+                break
+        out /= 1000
+    return out
 
 def init_reward_valve_time(sph) -> float:
     # Calc reward valve time
