@@ -83,7 +83,7 @@ def init_calib_func_range(sph) -> tuple:
 
     return min_open_time, max_open_time
 
-TODO: initialize calibration, etc when module first loaded via sph and the dependency here removed
+# TODO: initialize calibration, etc when module first loaded via sph and the dependency here removed
 def get_time_from_amount(sph, reward_amount) -> float:
     out = sph.CALIB_FUNC_RANGE[0]
     while np.round(sph.CALIB_FUNC(out), 3) < reward_amount:
