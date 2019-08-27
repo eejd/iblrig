@@ -260,7 +260,7 @@ RELATIVE HUMIDITY:    {self.as_data['RelativeHumidity']} %
         self.ntrials_correct += self.trial_correct
         # Update the water delivered
         if self.trial_correct:
-            self.water_delivered += self.reward_amount
+            self.water_delivered += self.reward_block_amount
 
         # SAVE TRIAL DATA
         params = self.__dict__.copy()
