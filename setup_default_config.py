@@ -337,6 +337,8 @@ def create_experiment_setups(iblproject_path, exp_name: str):  # XXX:THIS!
     if exp.name == '_iblrig_tasks':
         biasedChoiceWorld = create_setup(  # noqa
             exp, 'biasedChoiceWorld', p.boards[0].name, None)
+        biasedChoiceWorldRPE = create_setup(  # noqa
+            exp, 'biasedChoiceWorldRPE', p.boards[0].name, None)
         habituationChoiceWorld = create_setup(  # noqa
             exp, 'habituationChoiceWorld', p.boards[0].name, None)
         trainingChoiceWorld = create_setup(  # noqa
