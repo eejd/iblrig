@@ -254,6 +254,7 @@ def create_ibl_tasks(iblproject_path):  # XXX: THIS!
         '_iblrig_misc_flush_water',
         '_iblrig_misc_sync_test',
         '_iblrig_tasks_biasedChoiceWorld',
+        '_iblrig_tasks_biasedChoiceWorldRPE',
         '_iblrig_tasks_habituationChoiceWorld',
         '_iblrig_tasks_trainingChoiceWorld',
         '_iblrig_tasks_ephysChoiceWorld',
