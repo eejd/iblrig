@@ -220,6 +220,7 @@ def config_task(iblproject_path, task_name: str):  # XXX: THIS!
         '_iblrig_tasks_habituationChoiceWorld',
         '_iblrig_tasks_trainingChoiceWorld',
         '_iblrig_tasks_biasedChoiceWorld',
+        '_iblrig_tasks_biasedChoiceWorldRPE',
         '_iblrig_tasks_ephysChoiceWorld',
     ]
     if task.name in btasks:
