@@ -101,7 +101,7 @@ def init_reward_valve_time(sph) -> float:
     if not sph.AUTOMATIC_CALIBRATION:
         out = sph.CALIBRATION_VALUE / 3 * sph.REWARD_AMOUNT
     elif sph.AUTOMATIC_CALIBRATION and sph.CALIB_FUNC is not None:
-        self.get_time_from_amount(sph, sph.REWARD_AMOUNT)
+        out = get_time_from_amount(sph, sph.REWARD_AMOUNT)
     elif sph.AUTOMATIC_CALIBRATION and sph.CALIB_FUNC is None:
         msg = """
         ##########################################
